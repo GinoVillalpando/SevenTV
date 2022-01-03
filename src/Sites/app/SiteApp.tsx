@@ -130,6 +130,32 @@ export class SiteApp {
 		return emotes;
 	}
 
+	chatResize(): any {
+		console.log('right column div: ', document.getElementsByClassName('right-column')[0]);
+
+		const BORDER_SIZE  = 4;
+		const rightCol: any = document.getElementsByClassName('right-column')[0];
+
+		let m_pos: any;
+		const resize = (event: any) => {
+			const dx = m_pos - event.x;
+			m_pos = event.x;
+			rightCol.style.width = (parseInt(rightCol.style.width) + dx) + "px";
+		}
+
+		rightCol.addEventListener("mousedown", (event: any) => {
+			if (event.offsetX < BORDER_SIZE) {
+				m_pos = event.x;
+				document.addEventListener("mousemove", resize, false);
+			}
+		}, false);
+
+		document.addEventListener("mouseup", () => {
+			document.removeEventListener("mousemove", resize, false)
+		}, false);
+	}
+
+
 	@PageScriptListener('OnAssets')
 	onExtensionAssets(assetMap: [string, string][]) {
 		assetStore = new Map(assetMap);

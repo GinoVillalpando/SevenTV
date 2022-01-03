@@ -111,6 +111,23 @@ div[id="content"]
 	}
 }
 
+.right-column {
+    width: var(--ffz-chat-width) !important;
+    background-color: #f0f0ff !important;
+	padding-left: 4px !important;
+	right: 0 !important;
+	height: 100% !important;
+}
+
+.right-column::after {
+	content: '' !important;
+	background-color: #ccc !important;
+	left: 0 !important;
+	width: 4px !important;
+	height: 100% !important;
+	cursor: ew-resize !important;
+}
+
 .seventv-emote.seventv-emote-unlisted {
 	filter: blur(0.8rem);
 }

@@ -56,6 +56,7 @@ export class TwitchPageScript {
 				this.inputManager.setInputValue(`${value} ${emote.name} `);
 			})
 		).subscribe();
+		this.site.chatResize();
 	}
 
 	/**
