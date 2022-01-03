@@ -137,7 +137,7 @@ export class SiteApp {
 		const rightCol: any = document.getElementsByClassName('right-column')[0];
 
 		let m_pos: any;
-		const resize = (event: any) => {
+		function resize(event: any) {
 			const dx = m_pos - event.x;
 			m_pos = event.x;
 			rightCol.style.width = (parseInt(rightCol.style.width) + dx) + "px";
