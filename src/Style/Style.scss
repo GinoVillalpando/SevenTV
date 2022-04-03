@@ -44,6 +44,10 @@ div[id="content"]
 .seventv-overlay {
 	display: flex;
 	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
 	background-color: transparent;
 	color: var(--seventv-text-color);
 
@@ -68,16 +72,17 @@ div[id="content"]
 	}
 }
 
-// This hides the emote buttons created by Twitch
-.chat-line__message--emote-button {
-	display: none;
-}
 .chat-image-wrapper {
 	display: none;
 }
 
 .emoji {
 	height: 1.95em !important;
+}
+
+// Move the YouTube Slowmode countdown back over the Send button
+.yt-live-chat-message-input-renderer#countdown {
+	left: -73px;
 }
 
 .seventv-message-context > :first-child {
@@ -94,6 +99,10 @@ div[id="content"]
 
 .seventv-emote + .seventv-text-fragment:not(.seventv-text-empty) {
 	margin-right: 0.25em;
+}
+
+.twitch-emote {
+	cursor: pointer;
 }
 
 .seventv-mention {
@@ -114,10 +123,9 @@ div[id="content"]
 .right-column--beside {
 	padding-left: 4px;
 	height: 100% !important;
-	border-left: 4px solid #28b1a6;
 }
 
-.right-column--beside::before {
+.right-column--beside::after {
 	content: '' !important;
 	background-color: #28b1a6 !important;
 	width: 4px !important;
@@ -230,5 +238,19 @@ div[id="content"]
 .seventv-badge-list {
 	img {
 		height: 1.8rem;
+	}
+}
+
+// Base paint style
+
+body:not(.seventv-no-paints) [data-seventv-paint] {
+	background-clip: text !important;
+	background-size: cover !important;
+	-webkit-background-clip: text !important;
+	-webkit-text-fill-color: transparent;
+	background-color: currentColor;
+
+	.chat-author__intl-login {
+		opacity: unset !important;
 	}
 }
