@@ -111,18 +111,15 @@ div[id="content"]
 	}
 }
 
-.right-column {
-    width: var(--ffz-chat-width) !important;
-    background-color: #f0f0ff !important;
-	padding-left: 4px !important;
-	right: 0 !important;
+.right-column--beside {
+	padding-left: 4px;
 	height: 100% !important;
+	border-left: 4px solid #28b1a6;
 }
 
-.right-column::after {
+.right-column--beside::before {
 	content: '' !important;
-	background-color: #ccc !important;
-	left: 0 !important;
+	background-color: #28b1a6 !important;
 	width: 4px !important;
 	height: 100% !important;
 	cursor: ew-resize !important;

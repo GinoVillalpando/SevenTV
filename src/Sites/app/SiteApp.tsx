@@ -131,19 +131,42 @@ export class SiteApp {
 	}
 
 	chatResize(): any {
-		console.log('right column div: ', document.getElementsByClassName('right-column')[0]);
+		const BORDER_SIZE = 4;
+		let rightBeside: any = document.getElementsByClassName('right-column--beside')[0];
+		let chatCol: any = document.getElementsByClassName('channel-root__right-column')[0];
+		let resizeDiv: any = document.createElement('div'); // TODO: finish creating div for resizing chat
 
-		const BORDER_SIZE  = 4;
-		const rightCol: any = document.getElementsByClassName('right-column')[0];
+		resizeDiv.setAttribute('class', 'resize-div');
 
 		let m_pos: any;
+
 		function resize(event: any) {
 			const dx = m_pos - event.x;
 			m_pos = event.x;
-			rightCol.style.width = (parseInt(rightCol.style.width) + dx) + "px";
+
+			if (rightBeside.style.width) {
+				const widthNum = parseInt(rightBeside.style.width) + dx;
+				
+				if (widthNum >= 4) {
+					rightBeside.style.width = (widthNum < 4 ? 4 : widthNum) + 'px';
+				}
+			} else {
+				rightBeside.style.width = (parseInt(getComputedStyle(rightBeside, '').width) + dx) + 'px';
+			}
+
+			if (chatCol.style.width) {
+				const widthNum = parseInt(chatCol.style.width) + dx;
+
+				if (widthNum >= 340) {
+					chatCol.style.width = (widthNum < 340 ? 340 : widthNum) + 'px';
+				}
+
+			} else {
+				chatCol.style.width = (parseInt(getComputedStyle(chatCol, '').width) + dx) + 'px';
+			}
 		}
 
-		rightCol.addEventListener("mousedown", (event: any) => {
+		rightBeside.addEventListener("mousedown", (event: any) => {
 			if (event.offsetX < BORDER_SIZE) {
 				m_pos = event.x;
 				document.addEventListener("mousemove", resize, false);
@@ -151,7 +174,7 @@ export class SiteApp {
 		}, false);
 
 		document.addEventListener("mouseup", () => {
-			document.removeEventListener("mousemove", resize, false)
+			document.removeEventListener("mousemove", resize, false);
 		}, false);
 	}
 
