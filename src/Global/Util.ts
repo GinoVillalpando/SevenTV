@@ -1,7 +1,7 @@
 import { DataStructure } from '@typings/typings/DataStructure';
 import { Config } from 'src/Config';
 import Color from 'color';
-import { createTheme } from '@material-ui/core';
+import createTheme from '@material-ui/core/styles/createTheme';
 
 export function getRunningContext(): Context {
 	try {
@@ -140,3 +140,12 @@ export class SettingValue {
 
 export const unicodeTag0 = '\u{E0000}';
 export const unicodeTag7 = '\u{E0007}';
+
+export function decimalColorToRGBA(num: number): string {
+	const r = (num >>> 24) & 0xFF;
+	const g = (num >>> 16) & 0xFF;
+	const b = (num >>> 8) & 0xFF;
+	const a = num & 0xFF;
+
+	return `rgba(${r}, ${g}, ${b}, ${(a / 255).toFixed(3)})`;
+}

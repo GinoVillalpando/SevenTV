@@ -88,9 +88,14 @@ export class Twitch {
 	}
 
 	getChatInput(): Twitch.ChatInputComponent {
+
+		return this.getAutocompleteHandler()?.componentRef;
+	}
+
+	getAutocompleteHandler(): Twitch.ChatAutocompleteComponent {
 		const node = this.findReactChildren(
 			this.getReactInstance(document.querySelector('.chat-input__textarea')),
-			n => !!Object.keys(n.stateNode?.props).filter(k => n.stateNode?.props[k] === 'test')
+			n => n.stateNode.providers
 		);
 
 		return node?.stateNode;
@@ -138,6 +143,17 @@ export class Twitch {
 
 		return lines as Twitch.ChatLineAndComponent[];
 	}
+
+	getEmoteCardOpener(): Twitch.EmoteCardOpener {
+		const inst = document.querySelector(Twitch.Selectors.ChatContainer);
+
+		// This has to walk deep FeelsDankMan
+		const opener = this.findReactParents(
+			this.getReactInstance(inst),
+			n => n.stateNode.onShowEmoteCard, 200 );
+
+		return opener?.stateNode;
+	}
 }
 
 export namespace Twitch {
@@ -147,7 +163,7 @@ export namespace Twitch {
 		export const ChatContainer = 'section[data-test-selector="chat-room-component-layout"]';
 		export const ChatScrollableContainer = '.chat-scrollable-area__message-container';
 		export const ChatLine = '.chat-line__message';
-		export const ChatInput = '.chat-input textarea';
+		export const ChatInput = '.chat-input__textarea';
 		export const ChatInputButtonsContainer = 'div[data-test-selector="chat-input-buttons-container"]';
 		export const ChatMessageContainer = '.chat-line__message-container';
 		export const ChatUsernameContainer = '.chat-line__username-container';
@@ -345,9 +361,70 @@ export namespace Twitch {
 		channelLogin: string;
 		setInputValue: (v: string) => void;
 		onFocus: (v: any) => void;
+		onChange: (v: any) => void;
 		onKeyDown: (v: any) => void;
 		onValueUpdate: (v: any) => void;
-	}>;
+		value: string;
+	}> & { selectionStart: number };
+
+	export type ChatAutocompleteComponent = {
+		componentRef: Twitch.ChatInputComponent;
+		getMatches: (v: string) => TwitchEmote[]
+		props: {
+			channelID: string;
+			channelLogin: string;
+			clearModifierTray: () => void;
+			clearReplyToList: () => void;
+			closeCard: () => void;
+			closeKeyboardReplyTray: () => void;
+			currentUserDisplayName: string;
+			currentUserID: string;
+			currentUserLogin: string;
+			emotes: TwitchEmoteSet[];
+			isCurrentUserEditor: boolean;
+			isCurrentUserModerator: boolean;
+			isCurrentUserStaff: boolean;
+			messageBufferAPI: any;
+			onFocus: (v: any) => any;
+			onKeyDown: (v: any) => any;
+			onMatch: (e: any, t: any, i: any) => any;
+			onReset: (v: any) => any;
+			onValueUpdate: (v: any) => any;
+			setInputValue: (v: any) => any;
+			setModifierTray: (v: any) => any;
+			setReplyToList: (v: any) => any;
+			setTray: (v: any) => any;
+			showModerationIcons: boolean;
+			showTimestamps: boolean;
+			tray: any;
+			useHighContrastColors: boolean;
+		};
+		providers: Provider[];
+	};
+
+	export type Provider = {
+		autocompleteType: string
+		canBeTriggeredByTab: boolean
+		doesEmoteMatchTerm: (e: TwitchEmote, t: string) => boolean;
+		getMatchedEmotes: (s: string) => TwitchEmote[]
+		getMatches: (s: string) => TwitchEmote[]
+		props: {
+			emotes: TwitchEmoteSet[];
+			isEmoteAnimationsEnabled: boolean;
+			registerAutocompleteProvider: (p: Provider) => void;
+			theme: Theme;
+		};
+		renderEmoteSuggestion: (e: TwitchEmote) => TwitchEmote
+	};
+
+	export enum Theme {
+		'Light',
+		'Dark'
+	}
+
+	export interface EmoteCardOpener {
+		onShowEmoteCard: (v: any) => void;
+	}
 
 	export interface TwitchEmoteSet {
 		id: string;
@@ -358,11 +435,12 @@ export namespace Twitch {
 			login: string;
 			profileImageURL: string;
 		};
+		__typename?: string;
 	}
 
 	export interface TwitchEmote {
 		id: string;
-		modifiers: any;
+		modifiers?: any;
 		setID: string;
 		token: string;
 		type: string;
@@ -372,6 +450,8 @@ export namespace Twitch {
 			login: string;
 			profileImageURL: string;
 		};
+		__typename?: string;
+		srcSet?: string;
 	}
 
 	export interface BadgeSets {
@@ -434,6 +514,7 @@ export namespace Twitch {
 		ffz_emotes: any;
 		emotes?: any;
 		_ffz_checked?: boolean;
+		opener?: Twitch.EmoteCardOpener;
 
 	}
 	export namespace ChatMessage {

@@ -7,6 +7,7 @@ import { emoteStore } from 'src/Sites/app/SiteApp';
 import { TwitchPageScript } from 'src/Sites/twitch.tv/twitch';
 import { MessagePatcher } from 'src/Sites/twitch.tv/Util/MessagePatcher';
 import { Twitch } from 'src/Sites/twitch.tv/Util/Twitch';
+import { intervalToDuration, formatDuration } from 'date-fns';
 
 let currentHandler: (msg: Twitch.ChatMessage) => void;
 export class TwitchChatListener {
@@ -85,7 +86,8 @@ export class TwitchChatListener {
 			const modMsg = msg as unknown as Twitch.ChatMessage.ModerationMessage;
 
 			if (modMsg.moderationType === 1) { // Timeout
-				this.sendSystemMessage(`${modMsg.userLogin} was timed out for ${modMsg.duration} seconds${!!modMsg.reason ? ` (${modMsg.reason})` : ''} by a moderator`);
+				const humanizedInterval = formatDuration(intervalToDuration({start: 0, end: modMsg.duration * 1000}));
+				this.sendSystemMessage(`${modMsg.userLogin} was timed out for ${humanizedInterval}${!!modMsg.reason ? ` (${modMsg.reason})` : ''} by a moderator`);
 			} else if (modMsg.moderationType === 0) { // Ban
 				this.sendSystemMessage(`${modMsg.userLogin} was permanently banned by a moderator`);
 			} else if (modMsg.moderationType === 2) { // Message deleted
@@ -107,12 +109,16 @@ export class TwitchChatListener {
 			tap(line => {
 					this.page.banSliderManager.considerSlider( line );
 			}),
-			filter(line => !!line.component && !!line.component.props.message?.seventv),
+			filter(line => !!line.component),
 			// Render 7TV emotes
 			tap(line => {
-				line.component.props.message.seventv.currenUserID = line.component.props.currentUserID;
-				line.component.props.message.seventv.currentUserLogin = line.component.props.currentUserLogin;
-				line.component.props.message.seventv.patcher?.render(line);
+				this.renderPaintOnNametag(line);
+
+				if (!!line.component.props.message?.seventv) {
+					line.component.props.message.seventv.currenUserID = line.component.props.currentUserID;
+					line.component.props.message.seventv.currentUserLogin = line.component.props.currentUserLogin;
+					line.component.props.message.seventv.patcher?.render(line);
+				}
 			}),
 		).subscribe();
 	}
@@ -124,6 +130,32 @@ export class TwitchChatListener {
 		for (const line of lines) {
 			if (!line.component?.props) continue;
 			this.onMessage(line.component.props.message, line);
+			this.renderPaintOnNametag(line);
+		}
+	}
+
+	/**
+	 * Patch a chat line with a nametag paint when applicable
+	 */
+	renderPaintOnNametag(line: Twitch.ChatLineAndComponent): void {
+		if (!line.component.props || !line.component.props.message) {
+			return undefined;
+		}
+		const user = line.component.props.message.user;
+		const userID = parseInt(user.userID);
+		// Add paint?
+		if (!!user && this.page.site.paintMap.has(userID)) {
+			const paintID = this.page.site.paintMap.get(userID);
+			if (typeof paintID !== 'number') {
+				return undefined;
+			}
+			const paint = this.page.site.paints[paintID];
+			const username = line.element.querySelector<HTMLSpanElement>('[data-a-target="chat-message-username"], .chat-line__username');
+			username?.setAttribute('data-seventv-paint', paintID.toString());
+
+			if (!paint.color && username) {
+				username.style.color = line.component.props.message.user.color;
+			}
 		}
 	}
 
