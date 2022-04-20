@@ -247,43 +247,58 @@ export class SiteApp {
 		return emotes;
 	}
 
-	chatResize(): any {
+
+	chatResize(): void {
 		const BORDER_SIZE = 4;
-		let rightBeside: any = document.getElementsByClassName('right-column--beside')[0];
-		let chatCol: any = document.getElementsByClassName('channel-root__right-column')[0];
+		let rightBeside: any = document.getElementsByClassName('right-column--beside');
+		let theatreRight: any = document.getElementsByClassName('right-column--theatre');
+		let chatCol: any = document.getElementsByClassName('channel-root__right-column');
+		let vidPlayer: any = document.getElementsByClassName('persistent-player--theatre')
 		let resizeDiv: any = document.createElement('div'); // TODO: finish creating div for resizing chat
 
 		resizeDiv.setAttribute('class', 'resize-div');
 
 		let m_pos: any;
 
+		function resizer(element: any[], dx: number, px: number, vid?: boolean) {
+			if (element[0].style.width) {
+				const widthNum = parseInt(element[0].style.width) + dx;
+	
+				if (widthNum >= px) {
+					element[0].style.width = (widthNum < px ? px : widthNum) + 'px';
+					console.log('widthNum >= px', element[0].style.width, widthNum)
+				} 
+				
+				if (vid) {
+					element[0].style.width = 'calc(100% - ' +  widthNum + 'px);';
+					console.log('vid', element[0].style.width, widthNum)
+				}
+
+			} else { 
+				element[0].style.width = vid ?  
+					'calc(100% - ' +  (parseInt(getComputedStyle(element[0], '').width) + dx) + 'px);' 
+					: (parseInt(getComputedStyle(element[0], '').width) + dx) + 'px';
+
+			}
+		}
+
+
+
 		function resize(event: any) {
 			const dx = m_pos - event.x;
 			m_pos = event.x;
 
-			if (rightBeside.style.width) {
-				const widthNum = parseInt(rightBeside.style.width) + dx;
-				
-				if (widthNum >= 4) {
-					rightBeside.style.width = (widthNum < 4 ? 4 : widthNum) + 'px';
-				}
-			} else {
-				rightBeside.style.width = (parseInt(getComputedStyle(rightBeside, '').width) + dx) + 'px';
-			}
+			
+			if (theatreRight[0]) resizer(theatreRight, dx, 544);
+			
+			if (rightBeside[0]) resizer(rightBeside, dx, 4);
 
-			if (chatCol.style.width) {
-				const widthNum = parseInt(chatCol.style.width) + dx;
+			if (chatCol[0]) resizer(chatCol, dx, 340);
 
-				if (widthNum >= 340) {
-					chatCol.style.width = (widthNum < 340 ? 340 : widthNum) + 'px';
-				}
-
-			} else {
-				chatCol.style.width = (parseInt(getComputedStyle(chatCol, '').width) + dx) + 'px';
-			}
+			if (vidPlayer[0]) resizer(vidPlayer, dx, 544, true);
 		}
 
-		rightBeside.addEventListener("mousedown", (event: any) => {
+		rightBeside[0].addEventListener("mousedown", (event: any) => {
 			if (event.offsetX < BORDER_SIZE) {
 				m_pos = event.x;
 				document.addEventListener("mousemove", resize, false);
